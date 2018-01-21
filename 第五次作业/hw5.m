@@ -1,0 +1,27 @@
+clear all;
+lambda=532e-7;
+sigma=1/lambda;
+x0=-1024*256*lambda/8:lambda/8:(1024*256-1)*lambda/8;
+n=length(x0);
+nfft=2^(nextpow2(n)+3);
+Sigma=linspace(0,8*sigma,nfft);
+n1=floor(0.9998*nfft/8);   
+n2=ceil(1.0002*nfft/8);
+I0=2*cos(2*pi*x0*sigma);
+%B=2*abs(fft(I,nfft))/n;
+noise=[2*rand(size(x0))-1;sin(2e12*pi*sigma*x0);randn(size(x0));linspace(-1,1,n)];
+x_noise=[2*rand(size(x0))-1;sin(2e12*pi*sigma*x0);randn(size(x0))];
+figure;
+
+     x=x0+lambda/16*noise(2,:);
+     I=2*cos(2*pi*x*sigma);
+     B=2*abs(fft(I,nfft))/n;
+     subplot(4,3,3*2-2),plot(x0(10:400),I(10:400));
+     ylim([-3 3]);
+     subplot(4,3,3*2-1),hist(noise(2,:),100);
+     subplot(4,3,3*2),plot(Sigma(1:nfft/2),B(1:nfft/2)); 
+     [temp,wd]=sort(abs(B(n1:n2)-max(B(n1:n2))/2));             
+     peakwd=abs(wd(1)-wd(2))*sigma*8/nfft;
+     text(sigma,1,sprintf('·å¿í=%0.3f',peakwd));
+     text(sigma,1.8,sprintf('·å¸ß=%0.3f',max(B)));
+     xlabel('¦Ò/cm-1');

@@ -1,0 +1,25 @@
+lambda=632.8e-7;theta=1/lambda;x=-150:lambda/8:150;
+N=length(x);nfft=2^nextpow2(N);Theta=linspace(0,8*theta,nfft);
+ax=[];n1=floor(0.9998*nfft/8);n2=ceil(1.0002*nfft/8);B=zeros(4,n2-n1+1);
+I=2*cos(2*pi*x*theta).*(rectpuls(x,8));BL=abs(2*fft(I,nfft)/N);
+ax(1)=subplot(341);plot(Theta(n1:n2),BL(n1:n2));set(gca,'box','off');
+ax(2)=subplot(342);plot(Theta(n1:n2),BL(n1:n2));set(gca,'box','off');
+ax(3)=subplot(343);plot(Theta(n1:n2),BL(n1:n2));set(gca,'box','off');
+ax(4)=subplot(344);plot(Theta(n1:n2),BL(n1:n2));set(gca,'box','off');
+for i=1:4;
+  f=[50 75 100 150];a=0.2;
+  omiga=2*pi*(1-cos(atan(a/f(i))));
+  dtheta=theta*omiga/(2*pi);
+  E=pi/(omiga*theta);
+  B(i,n1:n2)=E*rectpuls(Theta(n1:n2)-theta*(1-(omiga/(4*pi))),dtheta);
+  BILS=conv(BL(n1:n2),B(i,n1:n2),'same');
+  [temp,wdind]=sort(abs(BILS-max(BILS)/2));
+  width=abs(wdind(1)-wdind(2))*theta*8/nfft;
+  ax(i+4)=subplot(3,4,i+4);plot(Theta(n1:n2),B(i,n1:n2));
+  set(gca,'box','off');
+  ax(i+8)=subplot(3,4,i+8);plot(Theta(n1:n2),BILS);
+  set(gca,'box','off');
+  text(theta,BILS(wdind(1)),sprintf('·å¿í=%0.2e',width));
+end
+linkaxes(ax,'x');
+xlim([0.9999*theta 1.0001*theta]);
